@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  uade_mongodb:
+    container_name: uade_mongodb
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017"
+    networks:
+      - back
+    volumes:
+      - ../data/db:/data/db
+  
+  uade_server:
+    container_name: uade_server
+    build: ./nodejs-server-express/
+    # environment: 
+      # - NODE_ENV=development
+    tty: true
+    depends_on:
+      - uade_mongodb
+    expose:
+      - "8000"
+    ports:
+      - "8001:8000"
+    networks:
+      - back
+      - front
+    volumes:
+      - ../consultorio-api:/usr/src/app
+
+  uade_client:
+    container_name: uade_client
+    build: ./nodejs-client/
+    tty: true
+    depends_on:
+      - uade_server
+    expose:
+      - "3000"
+    ports:
+      - "3001:3000"
+    networks:
+      - front
+    volumes:
+      - ../client:/usr/src/app
+      - ../TPO-DiagnosticoBelgrano:/usr/src/DiagnosticoBelgrano
+      - ../material-kit-react-master:/usr/src/material-kit
+      # - ../client.test1:/usr/src/client.test1
+      # - ../shopping-list:/usr/src/shopping-list
+
+networks:
+  back:
+    driver: bridge
+  front:
+    driver: bridge
